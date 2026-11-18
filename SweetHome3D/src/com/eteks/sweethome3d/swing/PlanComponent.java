@@ -2002,6 +2002,19 @@ public class PlanComponent extends JComponent implements PlanView, Scrollable, P
     }
     return strokeWidth;
   }
+
+  /**
+   * Returns all viewable levels in home in level order.
+   */
+  private ArrayList<Level> getPrintedLevels() {
+    ArrayList<Level> viewableLevels = new ArrayList<>();
+    for (Level level : home.getLevels()) {
+      if (level.isViewable()) {
+        viewableLevels.add(level);
+      }
+    }
+    return viewableLevels;
+  }
   
   /**
    * Prints this component plan at the scale given in the home print attributes or at a scale 
