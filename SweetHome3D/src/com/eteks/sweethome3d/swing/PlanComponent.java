@@ -2033,11 +2033,17 @@ public class PlanComponent extends JComponent implements PlanView, Scrollable, P
       float columnIndex;
       int pagesPerRow;
       int pagesPerColumn;
+      Level originalLevel = home.getSelectedLevel();
+      Level levelToPrint = null;
       if (this.home.getPrint() == null || this.home.getPrint().getPlanScale() == null) {
         // Compute a scale that ensures the plan will fill the component if plan scale is null
         printScale = getPrintPreferredScale(g, pageFormat) * LengthUnit.centimeterToInch(72);
         if (pageIndex >= Math.max(1, getPrintedLevels().size())) {
           return NO_SUCH_PAGE;
+        }
+        List<Level> printedLevels = getPrintedLevels();
+        if (!printedLevels.isEmpty()) {
+          levelToPrint = printedLevels.get(pageIndex);
         }
         pagesPerRow = 1;
         pagesPerColumn = 1;
@@ -2076,11 +2082,18 @@ public class PlanComponent extends JComponent implements PlanView, Scrollable, P
               (imageableHeight * pagesPerColumn / printScale - printedItemBounds.getHeight() - 2 * extraMargin) / 2));
       setRenderingHints(g2D);
       try {
+        if (levelToPrint != null) {
+          home.setSelectedLevel(levelToPrint);
+        }
         // Print component contents
         paintContent(g2D, printScale, PaintMode.PRINT);
       } catch (InterruptedIOException ex) {
         // Ignore exception because it may happen only in EXPORT paint mode 
-      }   
+      } finally {
+        if (levelToPrint != null) {
+          home.setSelectedLevel(originalLevel);
+        }
+      }
       g2D.dispose();
       return PAGE_EXISTS;
     } else {
