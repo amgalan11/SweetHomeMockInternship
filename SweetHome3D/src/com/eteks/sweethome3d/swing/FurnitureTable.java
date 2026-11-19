@@ -750,22 +750,38 @@ public class FurnitureTable extends JTable implements View, Printable {
           return headerRendererLabel;
         }
       };
-    for (int columnIndex = 0, n = columnModel.getColumnCount(); columnIndex < n; columnIndex++) {
-      final TableColumn tableColumn = columnModel.getColumn(columnIndex);
+
+    boolean levelColumnFound = false;
+    for (int i = 0, n = columnModel.getColumnCount(); i < n; i++) {
+      if (columnModel.getColumn(i).getIdentifier() == HomePieceOfFurniture.SortableProperty.LEVEL) {
+        levelColumnFound = true;
+      }
+    }
+
+    List<TableColumn> sourceColumns = new ArrayList<TableColumn>();
+    for (int i = 0, n = columnModel.getColumnCount(); i < n; i++) {
+      sourceColumns.add(columnModel.getColumn(i));
+    }
+    if (!levelColumnFound && columnModel instanceof FurnitureTableColumnModel) {
+      sourceColumns.add(((FurnitureTableColumnModel)columnModel).availableColumns.get(
+              HomePieceOfFurniture.SortableProperty.LEVEL));
+    }
+
+    for (final TableColumn tableColumn : sourceColumns) {
       // Create a printable column from existing table column
       TableColumn printableColumn = new TableColumn();
       printableColumn.setIdentifier(tableColumn.getIdentifier());
       printableColumn.setHeaderValue(tableColumn.getHeaderValue());
       TableCellRenderer printableCellRenderer = new TableCellRenderer() {
-          public Component getTableCellRendererComponent(JTable table, Object value, 
+          public Component getTableCellRendererComponent(JTable table, Object value,
                                  boolean isSelected, boolean hasFocus, int row, int column) {
-            // Delegate rendering to existing cell renderer 
+            // Delegate rendering to existing cell renderer
             TableCellRenderer cellRenderer = tableColumn.getCellRenderer();
-            Component rendererComponent = cellRenderer.getTableCellRendererComponent(table, value, 
+            Component rendererComponent = cellRenderer.getTableCellRendererComponent(table, value,
                 isSelected, hasFocus, row, column);
             if (rendererComponent instanceof JCheckBox) {
               // Prefer a x sign for boolean values instead of check boxes
-              rendererComponent = defaultRenderer.getTableCellRendererComponent(table, 
+              rendererComponent = defaultRenderer.getTableCellRendererComponent(table,
                   ((JCheckBox)rendererComponent).isSelected() ? "x" : "", false, false, row, column);
             }
             rendererComponent.setBackground(Color.WHITE);
@@ -773,7 +789,7 @@ public class FurnitureTable extends JTable implements View, Printable {
             return rendererComponent;
           }
         };
-      // Change printable column cell renderer 
+      // Change printable column cell renderer
       printableColumn.setCellRenderer(printableCellRenderer);
       // Change printable column header renderer
       printableColumn.setHeaderRenderer(printableHeaderRenderer);
